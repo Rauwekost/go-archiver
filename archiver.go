@@ -51,9 +51,14 @@ func (z *Zip) AddBytes(path string, b []byte) error {
 	return err
 }
 
-func (z *Zip) Add(pred string) error {
-	return readFiles(path.Dir(pred), path.Base(pred), func(p string, i os.FileInfo, r io.Reader) error {
-		zipfile, err := z.writer.Create(stripRootDir(p, path.Dir(pred)))
+func (z *Zip) Add(p string) error {
+	dir := path.Dir(p)
+	pred := path.Base(p)
+	if info, err := os.Stat(p); err == nil && info.IsDir() {
+		pred = "*"
+	}
+	return readFiles(dir, pred, func(p string, i os.FileInfo, r io.Reader) error {
+		zipfile, err := z.writer.Create(stripRootDir(p, dir))
 		if err != nil {
 			return err
 		}

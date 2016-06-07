@@ -19,13 +19,16 @@ func main() {
 	zip.Create("./testing.zip")
 	
 	//add a bytes to a file inside the zip
-	zip.Add("somefile.txt", []byte("someting inside"))
+	zip.AddBytes("somefile.txt", []byte("someting inside"))
 	
-	//recursive add dir
-	zip.AddDir("./testdir")
+	//add a file
+	zip.Add("./testdir/test.txt")
 	
-	//add all files in dir matching predicate
-	zip.AddAll(".", "*.go")
+	//add a dir
+	zip.Add("./testdir/")
+	
+	//add files using predicate
+	zip.Add("./testdir/*.go")
 	
 	//close the zip
 	zip.Close()

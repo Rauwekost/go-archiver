@@ -8,25 +8,43 @@ import (
 )
 
 type ArchTest struct {
-	AddBytesFileName string
-	AddBytesContent  []byte
-	Add              string
+	AddBytesFileName *string
+	AddBytesContent  *[]byte
+	Add              *string
 }
 
 var ArchTypes = []Archiver{
 	&Zip{},
 }
 
+func String(s string) *string {
+	var x string
+	x = s
+
+	return &x
+}
+
+func ByteSlice(b []byte) *[]byte {
+	var x []byte
+	x = b
+
+	return &x
+}
+
 var Tests = []ArchTest{
 	{
-		AddBytesFileName: "some-new-file.txt",
-		AddBytesContent:  []byte("hi, i'm new here"),
-		Add:              "./tests/loremipsum.txt",
+		AddBytesFileName: String("some-new-file.txt"),
+		AddBytesContent:  ByteSlice([]byte("hi, i'm new here")),
+		Add:              String("./tests/loremipsum.txt"),
 	},
 	{
-		AddBytesFileName: "some-new-file2.txt",
-		AddBytesContent:  []byte("hi, i'm new here too"),
-		Add:              "./tests/*.go",
+		Add: String("./tests/*.go"),
+	},
+	{
+		Add: String("./tests/dir"),
+	},
+	{
+		Add: String("./tests/dir/"),
 	},
 }
 
@@ -39,13 +57,17 @@ func TestArchiver(t *testing.T) {
 		arch.Create(fmt.Sprintf("_test/test-%d", time.Now().Unix()))
 		for _, at := range Tests {
 			//add bytes
-			if err := arch.AddBytes(at.AddBytesFileName, at.AddBytesContent); err != nil {
-				t.Fatalf("failed adding bytes to archive %+v: %s", arch, err)
+			if at.AddBytesFileName != nil && at.AddBytesContent != nil {
+				if err := arch.AddBytes(*at.AddBytesFileName, *at.AddBytesContent); err != nil {
+					t.Fatalf("failed adding bytes to archive %+v: %s", arch, err)
+				}
 			}
 
 			//add
-			if err := arch.Add(at.Add); err != nil {
-				t.Fatalf("failed adding file to archive %+v: %s", arch, err)
+			if at.Add != nil {
+				if err := arch.Add(*at.Add); err != nil {
+					t.Fatalf("failed adding file to archive %+v: %s", arch, err)
+				}
 			}
 		}
 		arch.Close()
