@@ -8,12 +8,9 @@ import (
 )
 
 type ArchTest struct {
-	AddFileName     string
-	AddContent      []byte
-	AddFile         string
-	AddDir          string
-	AddAllDir       string
-	AddAllPredicate string
+	AddBytesFileName string
+	AddBytesContent  []byte
+	Add              string
 }
 
 var ArchTypes = []Archiver{
@@ -22,12 +19,14 @@ var ArchTypes = []Archiver{
 
 var Tests = []ArchTest{
 	{
-		AddFileName:     "some-new-file.txt",
-		AddContent:      []byte("hi, i'm new here"),
-		AddFile:         "./tests/loremipsum.txt",
-		AddDir:          "./tests/dir",
-		AddAllDir:       "./tests/dir2",
-		AddAllPredicate: "*.go",
+		AddBytesFileName: "some-new-file.txt",
+		AddBytesContent:  []byte("hi, i'm new here"),
+		Add:              "./tests/loremipsum.txt",
+	},
+	{
+		AddBytesFileName: "some-new-file2.txt",
+		AddBytesContent:  []byte("hi, i'm new here too"),
+		Add:              "./tests/*.go",
 	},
 }
 
@@ -40,27 +39,13 @@ func TestArchiver(t *testing.T) {
 		arch.Create(fmt.Sprintf("_test/test-%d", time.Now().Unix()))
 		for _, at := range Tests {
 			//add bytes
-			if err := arch.Add(at.AddFileName, at.AddContent); err != nil {
+			if err := arch.AddBytes(at.AddBytesFileName, at.AddBytesContent); err != nil {
 				t.Fatalf("failed adding bytes to archive %+v: %s", arch, err)
 			}
 
-			//addfile
-			if err := arch.AddFile(at.AddFile); err != nil {
+			//add
+			if err := arch.Add(at.Add); err != nil {
 				t.Fatalf("failed adding file to archive %+v: %s", arch, err)
-			}
-
-			//addDir
-			if err := arch.AddDir(at.AddDir); err != nil {
-				t.Fatalf("failed adding dir to archive %+v: %s", arch, err)
-			}
-
-			//addAll
-			if err := arch.AddAll(at.AddAllDir, at.AddAllPredicate); err != nil {
-				t.Fatalf("failed adding all with predicate %s, to archive %+v: %s",
-					at.AddAllPredicate,
-					arch,
-					err,
-				)
 			}
 		}
 		arch.Close()
