@@ -98,7 +98,7 @@ func (z *Zip) Close() error {
 func readFiles(p string, predicate string, rfunc readFileFunc) error {
 	p = path.Clean(p)
 	return filepath.Walk(p, func(p string, i os.FileInfo, err error) error {
-		if !i.IsDir() {
+		if i != nil && !i.IsDir() {
 			matched, err := filepath.Match(predicate, i.Name())
 			if err != nil {
 				return err
